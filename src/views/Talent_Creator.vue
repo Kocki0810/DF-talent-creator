@@ -98,7 +98,7 @@ export default {
     getSpellData(spellid)
     {
       $.ajax({
-        url: "http://localhost/getspellinfo.php",
+        url: "http://localhost/DF_Talents/getspellinfo.php",
         type: "GET",
         data: {id : spellid},
         success: function(html){
