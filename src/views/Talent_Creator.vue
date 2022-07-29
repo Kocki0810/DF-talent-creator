@@ -20,8 +20,10 @@
     <div>
       <div v-for="x in this.class_rows" :key="x.id" class="talentrow">
         <div class="drop-zone">
-          <div v-for="y in x.fields" :key="y.iterator" class="drop-zone" @drop="onDrop($event, y.RowNumber, y.Placement, 'class')" @dragover.prevent @dragenter.prevent>
-            {{ y.spell.SpellID + " - " + y.Placement}}
+          <div v-for="y in x.fields" :key="y.iterator" class="drop-zone" v-on:click="start_connection(y)" @drop="onDrop($event, y.RowNumber, y.Placement, 'class')" @dragover.prevent @dragenter.prevent>
+            <span v-if="y.connections[0] != undefined && y.connections[0] != undefined">
+            {{ y.connections[0].RowNumber + " - " + y.connections[0].Placement}}
+            </span>
           </div>
         </div>
       </div>
@@ -43,10 +45,32 @@ export default {
         spells : [],
         text: "",
         counter: 1,
-        SpellID: ""
+        SpellID: "",
+        connection_active: false,
+        connect_from: null
     }
   },
   methods: {
+    logmsg(msg)
+    {
+      console.log(msg);
+    },
+    start_connection(row)
+    {
+      if(this.connection_active && this.connect_from != row)
+      {
+          this.connection_active = false;
+          this.connect_from.connections.push(row);
+          this.connect_from = "";
+      }
+      else
+      {
+        this.connection_active = true;
+        this.connect_from = row;
+      }
+      // this.logmsg(this.connect_from);
+      // this.logmsg(this.connection_active);
+    },
     addSpell(desc)
     {
       var talent = new Talent("", desc.text);
@@ -94,6 +118,7 @@ export default {
         }
         iterator++;
       }
+      console.clear();
     },
     getSpellData(spellid)
     {
