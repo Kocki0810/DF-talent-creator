@@ -2,10 +2,10 @@
   <div>
     <div>
       <h1>Create Spells</h1>
-      <textarea class="ability-desc" v-model="text" placeholder="Type Description here"></textarea>
+      <textarea class="ability-desc" v-model="spellDesc" placeholder="Type Description here"></textarea>
       <textarea class="ability-desc" v-model="SpellID" placeholder="Type Spell ID here"></textarea>
       <br>
-      <button @click="addSpell({text}); counter++">Add Spell</button>
+      <button @click="addSpell(); counter++">Add Spell</button>
     </div>
     <div class="drop-zone" @drop="onDropSpellArea($event, spell)">
       <div class="ability" draggable @dragstart="startDrag($event, spell) " v-for="spell in this.spells" :key="spell.SpellID">
@@ -43,9 +43,10 @@ export default {
         class_rows: [],
         spec_rows: [],
         spells : [],
-        text: "",
+        spellDesc: "",
         counter: 1,
         SpellID: "",
+        SpellData: "",
         connection_active: false,
         connect_from: null
     }
@@ -68,17 +69,26 @@ export default {
         this.connection_active = true;
         this.connect_from = row;
       }
-      // this.logmsg(this.connect_from);
-      // this.logmsg(this.connection_active);
     },
-    addSpell(desc)
+    addSpell()
     {
-      var talent = new Talent("", desc.text);
-      talent.SpellID = this.counter;
-      this.spells.push(talent);
       if(this.SpellID != "")
       {
-        this.getSpellData("123");
+        while(this.SpellID == "")
+        {
+          this.getSpellData(this.SpellID);
+        }
+        var apiData = JSON.parse(this.SpellData);
+        var talent = new Talent();
+        talent.image = apiData.media.key.href;
+        talent.Name = apiData.name;
+        talent.Desc = apiData.description;
+      }
+      else
+      {
+        var talent = new Talent("", desc.text);
+        this.spells.push(talent);
+        talent.SpellID = this.counter;
       }
     },
     startDrag(evt, spell)
@@ -120,14 +130,14 @@ export default {
       }
       console.clear();
     },
-    getSpellData(spellid)
+    getSpellData(SpellID)
     {
       $.ajax({
         url: "http://localhost/DF_Talents/getspellinfo.php",
         type: "GET",
-        data: {id : spellid},
+        data: {"spellid": SpellID},
         success: function(html){
-          console.log(html);
+          this.SpellData = html;
         }
       });
     }
